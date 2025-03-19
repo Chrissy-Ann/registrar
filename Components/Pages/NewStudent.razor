@@ -1,0 +1,45 @@
+﻿@page "/new"
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>New Student</PageTitle>
+
+<h1 class="display-5 p-4">New Student</h1>
+
+<form class="mb-4 ms-4 col-5 bg-light p-5 border border-1 rounded">
+    <div class="form-group mb-3">
+        <label for="fName" class="form-label">First Name</label>
+        <input id="fName" type="text" class="form-control"/><br/>
+    </div>
+    <div class="form-group mb-3">
+        <label for="lName" class="form-label">Last Name</label>
+        <input id="lName" type="text" class="form-control"/><br/>
+    </div>
+    <div class="form-group mb-4">
+        <label for="type" class="form-label">Student Type</label>
+        <select id="type" class="form-select">
+            <option selected>Choose a Type</option>
+            @foreach (var stuType in studentTypes)
+            {
+                <option value="@stuType" class="col-5">@stuType</option>
+            }
+        </select>
+    </div>
+    
+    <button class="btn btn-primary mt-3">Add Student</button>
+</form>
+
+<div class="ms-4">
+    <Button Title="Cancel" Navigate="NavigateToStudents"></Button>
+</div>
+
+
+@code {
+
+    List<string> studentTypes = Helper.GetStudentTypes();
+
+    public void NavigateToStudents()
+    {
+        Navigation.NavigateTo("/");
+    }
+}
