@@ -9,21 +9,23 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1 class="display-5 p-4">Register Student</h1>
+<h1 class="display-5 pt-3 ps-5">Register Student</h1>
 
-<form class="bg-light p-5 border border-1 rounded col-5 mb-4 ms-4">
-    <h2 class="mb-4">Student #@StudentId</h2>
-    @foreach (var course in courses)
-    {
-        <input type="checkbox" class="mb-4" id="@course.Code">
-        <label for="@course.Code">@course.Code @course.Title - @course.WeeklyHours hour(s) per week</label>
-        <br/>
-    }
+<div class="m-5 mb-3">
+    <form class="bg-light p-5 border border-1 rounded">
+        <h2 class="mb-4">Student #@StudentId</h2>
+        @foreach (var course in courses)
+        {
+            <input type="checkbox" class="mb-4" id="@course.Code">
+            <label for="@course.Code">@course.Code @course.Title - @course.WeeklyHours hour(s) per week</label>
+            <br/>
+        }
     
-    <button class="btn btn-primary mt-3">Register Student</button>
-</form>
+        <button class="btn btn-primary mt-3">Register Student</button>
+    </form>
+</div>
 
-<div class="mb-5 ms-4">
+<div class="ms-5 mb-4">
     <Button Title="Cancel" Navigate="NavigateToStudents"></Button>
 </div>
 
