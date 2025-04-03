@@ -13,14 +13,20 @@
 
 <div class="m-5 mb-3">
     <form class="bg-light p-5 border border-1 rounded">
-        <h2 class="mb-4">Student #@StudentId</h2>
+        @foreach (var student in students)
+        {
+            if (student.Id == StudentId)
+            {
+                <h2 class="mb-4">@student.FirstName @student.LastName #@student.Id</h2>
+            }
+        }
         @foreach (var course in courses)
         {
             <input type="checkbox" class="mb-4" id="@course.Code">
             <label for="@course.Code">@course.Code @course.Title - @course.WeeklyHours hour(s) per week</label>
             <br/>
         }
-    
+
         <button class="btn btn-primary mt-3">Register Student</button>
     </form>
 </div>
@@ -35,11 +41,18 @@
    [Parameter]
     public int StudentId { get; set; }
 
+    
+
     private static List<Course> courses = Helper.GetCourses();
     private static List<Student> students = Helper.GetStudents();
 
     public void NavigateToStudents()
     {
         Navigation.NavigateTo("/");
+    }
+    
+    public void GetStudent(int StudentId)
+    {
+        
     }
 }
