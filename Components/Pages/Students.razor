@@ -1,6 +1,11 @@
 ﻿@page "/"
 @page "/students"
+
+@using Microsoft.EntityFrameworkCore;
+
+@inject RegistrarDbContext Context
 @inject NavigationManager Navigation
+
 @rendermode InteractiveServer
 
 <PageTitle>Students</PageTitle>
@@ -38,11 +43,16 @@
 </div>
 
 @code {
-    
-    List<Student> students = Helper.GetStudents();
+
+    private List<Student> students;
 
     public void NavigateToNew()
     {
         Navigation.NavigateTo("/new");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        students = await Context.Students.ToListAsync();
     }
 }

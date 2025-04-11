@@ -1,5 +1,9 @@
 ﻿@page "/new"
+@using Microsoft.EntityFrameworkCore;
+
+@inject RegistrarDbContext Context;
 @inject NavigationManager Navigation
+
 @rendermode InteractiveServer
 
 <PageTitle>New Student</PageTitle>
@@ -7,28 +11,34 @@
 <h1 class="display-5 pt-3 ps-5">New Student</h1>
 
 <div class="m-5 mb-3">
-    <form class="bg-light p-5 border border-1 rounded">
+    <EditForm Model="AddStudent" FormName="NewStudentForm" OnValidSubmit="AddNewStudent" class="bg-light p-5 border border-1 rounded">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
         <div class="form-group mb-3">
             <label for="fName" class="form-label">First Name</label>
-            <input id="fName" type="text" class="form-control"/><br/>
+            <InputText id="fName" class="form-control" @bind-Value="@AddStudent.FirstName" />
+            <ValidationMessage For="@(() => AddStudent.FirstName)" />
         </div>
+        
         <div class="form-group mb-3">
             <label for="lName" class="form-label">Last Name</label>
-            <input id="lName" type="text" class="form-control"/><br/>
+            <InputText id="lName" class="form-control" @bind-Value="@AddStudent.LastName" />
+            <ValidationMessage For="@(() => AddStudent.LastName)" />
         </div>
+        
         <div class="form-group mb-4">
             <label for="type" class="form-label">Student Type</label>
-            <select id="type" class="form-select">
-                <option selected>Choose a Type</option>
+            <InputSelect id="type" class="form-select" @bind-Value="@AddStudent.Type" >
                 @foreach (var stuType in studentTypes)
                 {
                     <option value="@stuType">@stuType</option>
                 }
-            </select>
+            </InputSelect>
+            <ValidationMessage For="@(() => AddStudent.Type)" />
         </div>
-    
-        <button class="btn btn-primary mt-3">Add Student</button>
-    </form>
+
+        <button type="submit" class="btn btn-success mt-3">Add Student</button>
+    </EditForm>
 </div>
 
 <div class="ms-5 mb-4">
@@ -38,10 +48,25 @@
 
 @code {
 
+    [SupplyParameterFromForm]
+    private Student AddStudent { get; set; } = new();
+
     List<string> studentTypes = Helper.GetStudentTypes();
 
     public void NavigateToStudents()
     {
         Navigation.NavigateTo("/");
     }
+
+    private async Task AddNewStudent()
+    {
+        // Generate Random Id
+        int id = new Random().Next(100000, 900000);
+        AddStudent.Id = id;
+        
+        Context.Students.Add(AddStudent);
+        await Context.SaveChangesAsync();
+        Navigation.NavigateTo("/");
+    }
+    
 }
