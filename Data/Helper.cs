@@ -68,4 +68,38 @@ public class Helper
   public static List<string> GetStudentTypes () {
     return ["Full Time", "Part Time", "Coop"];
   }
+
+  public static List<Student> GetStudents()
+  {
+    List<Student> students = [];
+
+    Student student = new Student
+    {
+      Id = 52000,
+      FirstName = "John",
+      LastName = "Doe",
+      Type = "Full Time",
+    };
+    students.Add(student);
+
+    student = new Student
+    {
+      Id = 40199,
+      FirstName = "Jane",
+      LastName = "Doe",
+      Type = "Part Time",
+    };
+    students.Add(student);
+
+    student = new Student
+    {
+      Id = 56780,
+      FirstName = "Joan",
+      LastName = "Smith",
+      Type = "Coop",
+    };
+    students.Add(student);
+    
+    return students;
+  }
 }

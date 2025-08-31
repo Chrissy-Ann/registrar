@@ -1,0 +1,48 @@
+﻿@page "/"
+@page "/students"
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Students</PageTitle>
+
+<h1 class="display-5 p-4">Students</h1>
+
+<div class="m-4">
+    <Button Title="Add Student" Navigate="NavigateToNew"></Button>
+</div>
+
+<div class="ms-4 me-4">
+    <table class="table table-bordered border border-1 table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Type</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var student in students)
+        {
+            <tr>
+                <td>@student.Id</td>
+                <td>@student.FirstName</td>
+                <td>@student.LastName</td>
+                <td>@student.Type</td>
+                <td><a href="/register/@student.Id">Register</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    
+    List<Student> students = Helper.GetStudents();
+
+    public void NavigateToNew()
+    {
+        Navigation.NavigateTo("/new");
+    }
+}

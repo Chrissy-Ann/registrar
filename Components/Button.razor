@@ -1,0 +1,12 @@
+﻿
+<button @onclick="Navigate" class="btn border border-2">@Title</button>
+
+@code {
+    
+    [Parameter]
+    public string? Title { get; set; }
+    
+    [Parameter]
+    public EventCallback Navigate { get; set; }
+    
+}
