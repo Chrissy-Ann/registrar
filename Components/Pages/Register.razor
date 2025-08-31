@@ -1,5 +1,9 @@
 ﻿@page "/register/{studentId:int}"
+@using Microsoft.EntityFrameworkCore;
+
+@inject RegistrarDbContext Context;
 @inject NavigationManager Navigation
+
 @rendermode InteractiveServer
 
 @if (!students.Exists(student => student.Id == StudentId))
@@ -12,23 +16,28 @@
 <h1 class="display-5 pt-3 ps-5">Register Student</h1>
 
 <div class="m-5 mb-3">
-    <form class="bg-light p-5 border border-1 rounded">
-        @foreach (var student in students)
+    <EditForm Model="RegisterCourse" FormName="CourseRegisterForm" OnSubmit="Validation" class="bg-light p-5 border border-1 rounded">
+       
+        <h2 class="mb-4">@student.FirstName @student.LastName #@student.Id</h2>
+        <DataAnnotationsValidator />
+        @if (success)
         {
-            if (student.Id == StudentId)
-            {
-                <h2 class="mb-4">@student.FirstName @student.LastName #@student.Id</h2>
-            }
+            <div class="alert alert-success">@successMessage</div>
+        }
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
         }
         @foreach (var course in courses)
         {
-            <input type="checkbox" class="mb-4" id="@course.Code">
-            <label for="@course.Code">@course.Code @course.Title - @course.WeeklyHours hour(s) per week</label>
-            <br/>
+            <div class="form-check">
+            <InputCheckbox class="form-check-input mb-4" id="@course.Id" @bind-Value="course.IsChecked"/>
+            <label for="@course.Id">@course.Code @course.Title - @course.WeeklyHours hour(s) per week</label>
+            </div>
         }
 
-        <button class="btn btn-primary mt-3">Register Student</button>
-    </form>
+        <button type="submit" class="btn btn-primary mt-3">Register Student</button>
+    </EditForm>
 </div>
 
 <div class="ms-5 mb-4">
@@ -41,18 +50,125 @@
    [Parameter]
     public int StudentId { get; set; }
 
+    [SupplyParameterFromForm]
+    private Course RegisterCourse { get; set; } = new();
+
+
+    private Student student;
+    private List<Course> courses { get; set; }
+    private List<Student> students { get; set; }
+    private List<Course> enrolledCourses { get; set; }
+
+    private int totalNumCourses;
+    private int totalWeeklyHours;
     
+    private bool success = false;
+    private string successMessage = "";
+    private string errorMessage = "";
+    
+    protected override async Task OnInitializedAsync()
+    {
+        student = await Context.Students
+            .Where(s => s.Id == StudentId)
+            .FirstOrDefaultAsync();
+        
+        enrolledCourses = await Context.Courses
+            .Where(c => Context.Registrations.Any(r => r.StudentId == StudentId && r.CourseId == c.Id))
+            .ToListAsync();
+        
+        courses = await Context.Courses.ToListAsync();
+        students = await Context.Students.ToListAsync();
+        
+        // Clear out previous checkbox data
+        foreach (var course in courses)
+        {
+            course.IsChecked = false;
+        }
+        
+        // Pre-check all courses already registered
+        foreach (var course in enrolledCourses)
+        {
+            course.IsChecked = true;
+        }
+    }
+    
+    private void Validation()
+    {
+        var error = "";
+        errorMessage = "";
+        totalWeeklyHours = 0;
+        totalNumCourses = 0;
+        
+        List<Course> selectedCourses = [];
+        
+        foreach (var course in courses)
+        {
+           if (course.IsChecked)
+           {
+               selectedCourses.Add(course);
+               totalWeeklyHours = totalWeeklyHours + course.WeeklyHours;
+           }
+        }
 
-    private static List<Course> courses = Helper.GetCourses();
-    private static List<Student> students = Helper.GetStudents();
+        totalNumCourses = selectedCourses.Count;
+        
+        switch (student.Type)
+        {
+            case "Full Time":
+                if (totalWeeklyHours > 16)
+                {
+                    error = $"{student.Type} students can only register for a maximum of 16 hours per week.";
+                }
+                break;
+            case "Part Time":
+                if (totalNumCourses > 3)
+                {
+                    error = $"{student.Type} students can only register for a maximum of 3 courses.";
+                }
+                break;
+            case "Coop":
+                if (totalNumCourses > 2 || totalWeeklyHours > 4)
+                {
+                    error = $"{student.Type} students can only register for a maximum of 2 courses and a maximum of 4 hours per week";
+                }
+                break;
+        }
 
+        if (!string.IsNullOrWhiteSpace(error))
+        {
+            errorMessage = error;
+        }
+        else
+        {
+            RegisterInCourse();
+        }
+        
+    }
+    
+    private async Task RegisterInCourse()
+    {
+            foreach (var course in courses)
+            {
+                if (course.IsChecked && !Context.Registrations.Any(r => r.StudentId == StudentId && r.CourseId == course.Id))
+                {
+                    var registration = new Registration
+                    {
+                        StudentId = student.Id,
+                        CourseId = course.Id
+                    };
+
+                    Context.Registrations.Add(registration);
+                }
+            }
+
+            await Context.SaveChangesAsync();
+            
+            success = true;
+            successMessage = $"The student has been registered in {totalNumCourses} course(s), {totalWeeklyHours} hour(s) weekly.";
+    }
+    
     public void NavigateToStudents()
     {
         Navigation.NavigateTo("/");
-    }
-    
-    public void GetStudent(int StudentId)
-    {
-        
     }
 }
